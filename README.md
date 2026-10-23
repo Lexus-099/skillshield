@@ -502,6 +502,6 @@ CI runs `pytest` on Python 3.10, 3.11 and 3.12. It runs `ruff` and `black` on Py
 
 **Linda Oraegbunam**
 
-Senior Performance Analyst, HMRC MTD | ML Engineer, Readrly.io
+Senior AI Engineer, | ML Engineer
 
 [LinkedIn](https://www.linkedin.com/in/linda-oraegbunam/) · [Twitter](https://twitter.com/Obie_Linda) · [YouTube](https://youtube.com/@AIwithLinda) · [GitHub](https://github.com/obielin)
