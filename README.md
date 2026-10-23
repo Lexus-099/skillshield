@@ -18,8 +18,8 @@ In January 2026, the **ClawHavoc campaign** dropped 341 malicious skills into th
 There is no open-source scanner for this. Until now.
 
 ```bash
-pip install skillguard
-skillguard scan SKILL.md
+pip install skillshield
+skillshield scan SKILL.md
 ```
 
 ```
