@@ -266,7 +266,7 @@ def _check_obfuscation(text: str) -> list[str]:
         matches.append(m.group(0)[:80] + "...")
 
     # Unicode escape sequences in bulk
-    uni_re = re.compile(r"(?:\u[0-9a-fA-F]{4}){10,}")
+    uni_re = re.compile(r"(?:\\u[0-9a-fA-F]{4}){10,}")
     for m in uni_re.finditer(text):
         matches.append(m.group(0)[:80] + "...")
 
@@ -491,14 +491,14 @@ def _edit_distance_at_most_two(left: str, right: str) -> int:
 
 
 def _check_brand_name_impersonation(text: str) -> list[str]:
-    """Flag suspicious near-matches in SKILL.md frontmatter names only."""
+    """Flag suspicious near-matches in skill frontmatter names only."""
     frontmatter = _FRONTMATTER_NAME.match(text)
     if not frontmatter:
         return []
     name_match = _NAME_FIELD.search(frontmatter.group(1))
     if not name_match:
         return []
-    name = name_match.group(1).strip().strip("'\\"").casefold()
+    name = name_match.group(1).strip().strip("'\"").casefold()
     if not name or any(char.isspace() for char in name):
         return []
     known_names = _well_known_names()
