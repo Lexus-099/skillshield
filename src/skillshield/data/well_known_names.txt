@@ -1,0 +1,5 @@
+# Extend this list with canonical, well-known skill names (one per line).
+clawhub
+github
+weather
+web-search
