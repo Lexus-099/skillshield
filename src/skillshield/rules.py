@@ -448,7 +448,6 @@ RULE_SUSPICIOUS_URLS = Rule(
 )
 
 
-
 # ── SG-013: Well-known skill name impersonation ─────────────────
 
 _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
@@ -511,8 +510,13 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
         known_normalized = re.sub(r"[^a-z0-9]", "", known)
         if not known_normalized or normalized == known_normalized:
             continue
-        if normalized.startswith(known_normalized) and normalized[len(known_normalized):] in {
-            "1", "2", "pro", "official", "app", "ai"
+        if normalized.startswith(known_normalized) and normalized[len(known_normalized) :] in {
+            "1",
+            "2",
+            "pro",
+            "official",
+            "app",
+            "ai",
         }:
             return [name_match.group(1).strip()]
         if _edit_distance_at_most_two(normalized, known_normalized) <= 2:
