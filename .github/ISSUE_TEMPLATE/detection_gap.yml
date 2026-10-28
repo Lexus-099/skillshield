@@ -1,0 +1,56 @@
+name: Detection gap
+description: A malicious or risky skill was not flagged, or was flagged too low
+labels: ["detection-gap"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Defang your sample.** Use example.com or documentation IP addresses (192.0.2.x), fake keys and placeholder wallets. Never paste a working payload or a live malicious link: issues are public.
+
+        If the skill is part of an active campaign that is not yet public, report it privately instead (see SECURITY.md).
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/obielin/skillshield/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+        - label: I searched existing issues and this has not been reported
+          required: true
+        - label: My sample is defanged and contains no live links, working payloads or real secrets
+          required: true
+  - type: textarea
+    id: sample
+    attributes:
+      label: Defanged sample
+      description: The smallest text that shows the technique.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: got
+    attributes:
+      label: What SkillShield reported
+      description: The risk level and findings, or "SAFE".
+      render: shell
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected
+      description: Which rule should catch it, or why it needs a new rule, and at what severity.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Where this technique comes from
+      description: A report, advisory or write-up, if there is one.
+  - type: input
+    id: version
+    attributes:
+      label: SkillShield version
+      placeholder: output of skillshield --version
+    validations:
+      required: true

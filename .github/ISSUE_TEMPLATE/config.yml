@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Report a vulnerability in SkillShield
+    url: https://github.com/obielin/skillshield/security/advisories/new
+    about: Vulnerabilities in SkillShield itself are reported privately. A skill that is not flagged is a detection gap, so use the form below instead.
+  - name: Questions and how-to
+    url: https://github.com/obielin/skillshield/discussions
+    about: Ask how to use SkillShield, or share how you use it.

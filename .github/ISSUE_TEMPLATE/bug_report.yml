@@ -1,0 +1,57 @@
+name: Bug report
+description: SkillShield crashed, gave wrong output or the wrong exit code
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Issues are public. Do not paste real secrets, private skills or live malicious links. For a vulnerability in SkillShield itself, use private reporting instead (see SECURITY.md).
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/obielin/skillshield/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+        - label: I searched existing issues and this has not been reported
+          required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: The exact command you ran, and a minimal file that shows the problem.
+      placeholder: skillshield scan SKILL.md --format json
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Output
+      description: The output and the exit code (`echo $?`).
+      render: shell
+  - type: input
+    id: version
+    attributes:
+      label: SkillShield version
+      placeholder: output of skillshield --version
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Python version and operating system
+      placeholder: Python 3.12 on Ubuntu 24.04
+    validations:
+      required: true

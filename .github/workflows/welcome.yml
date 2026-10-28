@@ -1,0 +1,46 @@
+name: Welcome
+
+on:
+  pull_request_target:
+    types: [opened]
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    runs-on: ubuntu-latest
+    steps:
+      # Uses search to count the author's earlier issues or PRs, so only a real
+      # first-timer is greeted. This workflow never checks out or runs PR code.
+      - uses: actions/github-script@v9
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const isPr = !!context.payload.pull_request;
+            const item = context.payload.pull_request || context.payload.issue;
+            const user = item.user.login;
+            if (item.user.type === 'Bot' || user.endsWith('[bot]')) return;
+            if (user === owner) return;
+
+            const kind = isPr ? 'pr' : 'issue';
+            const { data: prior } = await github.rest.search.issuesAndPullRequests({
+              q: `repo:${owner}/${repo} is:${kind} author:${user}`, per_page: 2 });
+            // The item that triggered this run is itself in the count.
+            if (prior.total_count > 1) return;
+
+            const base = `https://github.com/${owner}/${repo}/blob/main`;
+            const body = isPr
+              ? `Welcome to SkillShield, @${user}, and thanks for your first pull request.\n\n`
+                + `- CI runs automatically, but on a first contribution it waits for a maintainer to approve the run. If it looks stuck, that is on us.\n`
+                + `- A maintainer will review this by hand.\n`
+                + `- [CONTRIBUTING.md](${base}/CONTRIBUTING.md) has the details, including how test samples must be defanged.`
+              : `Thanks for opening your first issue, @${user}. A maintainer will take a look.\n\n`
+                + `- [SUPPORT.md](${base}/SUPPORT.md) lists where to ask what.\n`
+                + `- If you would like to fix it yourself, [CONTRIBUTING.md](${base}/CONTRIBUTING.md) explains how.`;
+
+            await github.rest.issues.createComment({
+              owner, repo, issue_number: item.number, body });

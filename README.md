@@ -483,13 +483,9 @@ print([f.rule_id for f in defaults_plus_mine.scan_text(text).findings])
 
 ## Contributing
 
-Issues and PRs are welcome. For new detection rules, please include:
+Issues and pull requests are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) first: it explains which changes need an issue first, how to add a detection rule, and how to keep test samples safe.
 
-1. A real-world example or CVE reference
-2. At least 3 test cases (true positive, true positive variant, true negative)
-3. Remediation guidance
-
-Set up and run the checks before you open a PR:
+Set up and run the checks before you open a pull request:
 
 ```bash
 pip install -e ".[dev]"
@@ -498,7 +494,10 @@ ruff check src tests
 black --check src tests
 ```
 
-CI runs `pytest` on Python 3.10, 3.11 and 3.12. It runs `ruff` and `black` on Python 3.11.
+- [GOVERNANCE.md](GOVERNANCE.md): how decisions are made, and the contributor ladder
+- [SUPPORT.md](SUPPORT.md): where to ask what
+- [SECURITY.md](SECURITY.md): how to report a vulnerability in SkillShield privately
+- [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
 
 ---
 

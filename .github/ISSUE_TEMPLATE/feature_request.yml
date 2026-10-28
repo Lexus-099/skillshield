@@ -1,0 +1,41 @@
+name: Feature request
+description: Suggest a new feature or improvement
+labels: ["enhancement"]
+body:
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/obielin/skillshield/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+        - label: I searched existing issues and this has not been requested
+          required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What are you trying to do, and what gets in the way?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: How you would like it to work.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - CLI
+        - Output formats (JSON, SARIF)
+        - Scoring and risk levels
+        - Python API
+        - CI integration
+        - Documentation
+        - Other
+    validations:
+      required: true

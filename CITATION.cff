@@ -1,0 +1,16 @@
+cff-version: 1.2.0
+message: "If you use SkillShield in your research or work, please cite it as below."
+title: "SkillShield: a security scanner for AI agent skills"
+type: software
+authors:
+  - family-names: Oraegbunam
+    given-names: Linda
+version: 1.1.0
+license: MIT
+repository-code: "https://github.com/obielin/skillshield"
+url: "https://pypi.org/project/skillshield/"
+keywords:
+  - ai-security
+  - prompt-injection
+  - agent-skills
+  - supply-chain-security

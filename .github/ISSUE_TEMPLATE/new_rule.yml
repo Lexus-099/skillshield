@@ -1,0 +1,66 @@
+name: New rule proposal
+description: Propose a new detection rule before writing it
+labels: ["new-rule"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        New rules change what every user sees, so we agree on the approach here before code is written. See "Adding or changing a detection rule" in CONTRIBUTING.md for what a rule needs. Keep every example defanged.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you start
+      options:
+        - label: I agree to follow the [Code of Conduct](https://github.com/obielin/skillshield/blob/main/CODE_OF_CONDUCT.md)
+          required: true
+        - label: I checked that no existing rule (`skillshield rules`) already covers this
+          required: true
+        - label: My examples are defanged
+          required: true
+  - type: textarea
+    id: threat
+    attributes:
+      label: The technique
+      description: What a malicious skill does, and what harm it causes.
+    validations:
+      required: true
+  - type: textarea
+    id: reference
+    attributes:
+      label: Reference
+      description: A report, advisory, CVE or OWASP entry that shows this technique is used or proposed.
+    validations:
+      required: true
+  - type: textarea
+    id: positives
+    attributes:
+      label: Examples it should flag
+      description: At least two, worded differently.
+      render: markdown
+    validations:
+      required: true
+  - type: textarea
+    id: negatives
+    attributes:
+      label: Similar safe text it must not flag
+      description: Legitimate skills that use similar words. This is how we keep false positives down.
+      render: markdown
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Proposed severity
+      options:
+        - CRITICAL
+        - HIGH
+        - MEDIUM
+        - LOW
+    validations:
+      required: true
+  - type: checkboxes
+    id: build
+    attributes:
+      label: Contributing
+      options:
+        - label: I would like to write this rule myself once the approach is agreed
