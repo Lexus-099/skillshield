@@ -266,7 +266,7 @@ def _check_obfuscation(text: str) -> list[str]:
         matches.append(m.group(0)[:80] + "...")
 
     # Unicode escape sequences in bulk
-    uni_re = re.compile(r"(?:\\u[0-9a-fA-F]{4}){10,}")
+    uni_re = re.compile(r"(?:\u[0-9a-fA-F]{4}){10,}")
     for m in uni_re.finditer(text):
         matches.append(m.group(0)[:80] + "...")
 
@@ -451,8 +451,8 @@ RULE_SUSPICIOUS_URLS = Rule(
 
 # ── SG-013: Well-known skill name impersonation ─────────────────
 
-_FRONTMATTER_NAME = re.compile(r"^---\\s*\\n(.*?)\\n---\\s*(?:\\n|$)", re.DOTALL)
-_NAME_FIELD = re.compile(r"^name\\s*:\\s*(.*?)\\s*$", re.MULTILINE)
+_FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
+_NAME_FIELD = re.compile(r"^name\s*:\s*(.*?)\s*$", re.MULTILINE)
 
 
 def _well_known_names() -> set[str]:
@@ -498,7 +498,7 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
     name_match = _NAME_FIELD.search(frontmatter.group(1))
     if not name_match:
         return []
-    name = name_match.group(1).strip().strip("'\\\"").casefold()
+    name = name_match.group(1).strip().strip("'\\"").casefold()
     if not name or any(char.isspace() for char in name):
         return []
     known_names = _well_known_names()
