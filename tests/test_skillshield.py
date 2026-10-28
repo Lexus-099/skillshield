@@ -609,22 +609,29 @@ def test_cli_version_prints_package_version(monkeypatch, capsys):
     assert capsys.readouterr().out.strip() == f"skillshield {skillshield.__version__}"
 
 
-
 class TestBrandNameImpersonationRule:
     def test_detects_typo_of_known_name(self):
-        result = SkillScanner().scan_text("---\nname: cllawhub\ndescription: test\n---\nA harmless skill.")
+        result = SkillScanner().scan_text(
+            "---\nname: cllawhub\ndescription: test\n---\nA harmless skill."
+        )
         assert "SG-013" in [finding.rule_id for finding in result.findings]
 
     def test_detects_known_name_with_numeric_suffix(self):
-        result = SkillScanner().scan_text("---\nname: clawhub1\ndescription: test\n---\nA harmless skill.")
+        result = SkillScanner().scan_text(
+            "---\nname: clawhub1\ndescription: test\n---\nA harmless skill."
+        )
         assert "SG-013" in [finding.rule_id for finding in result.findings]
 
     def test_allows_exact_known_name(self):
-        result = SkillScanner().scan_text("---\nname: clawhub\ndescription: test\n---\nA harmless skill.")
+        result = SkillScanner().scan_text(
+            "---\nname: clawhub\ndescription: test\n---\nA harmless skill."
+        )
         assert "SG-013" not in [finding.rule_id for finding in result.findings]
 
     def test_does_not_flag_unrelated_name(self):
-        result = SkillScanner().scan_text("---\nname: weather\ndescription: test\n---\nA harmless skill.")
+        result = SkillScanner().scan_text(
+            "---\nname: weather\ndescription: test\n---\nA harmless skill."
+        )
         assert "SG-013" not in [finding.rule_id for finding in result.findings]
 
     def test_ignores_files_without_frontmatter(self):
