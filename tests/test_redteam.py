@@ -58,36 +58,36 @@ EXPECTED = {
 
 # Malicious samples not yet flagged at their expected severity: sample -> what is missing.
 KNOWN_GAPS = {
-    "02-paraphrased-injection": "reworded instruction override",
-    "04-zero-width-split": "text is not normalised before matching (zero-width characters)",
-    "05-homoglyph": "text is not normalised before matching (lookalike letters)",
-    "06-base64-payload": "base64 is flagged but its decoded content is not scanned",
-    "07-curl-pipe-shell": "piping a downloaded script into a shell",
-    "08-natural-exfil": "plain-English instruction to send secret files to a URL",
-    "09-markdown-image-exfil": "data leaked through a markdown image URL",
-    "10-python-exfil": "code that posts environment variables to a URL",
-    "11-impersonation": "persona that denies being an AI",
-    "12-rug-pull": "instruction to replace the skill with remote content",
-    "13-tool-poisoning": "hidden side action the user is told nothing about",
-    "14-delayed-trigger": "dormant instruction that fires on a trigger word",
-    "15-base64-pipe-shell": "short base64 decoded and piped into a shell",
-    "16-fake-prerequisite-archive": "fake prerequisite: download a password-protected archive and run it",
-    "17-paste-site-script": "install script from a paste site pasted into a terminal",
-    "18-memory-poisoning": "writes instructions into agent memory files",
-    "19-persistence-service": "installs a system service or cron job",
-    "20-fake-system-tag": "fake <SYSTEM> tag and developer-mode framing",
-    "21-suppress-security-warnings": "tells the agent to hide security findings",
-    "22-cross-tool-hijack": "instruction that changes how other tools run",
-    "23-unicode-tag-smuggling": "instruction hidden in invisible Unicode tag characters",
-    "24-bidi-override": "right-to-left override characters hide what text says",
-    "25-remote-instructions": "fetches instructions from a URL at run time and follows them",
-    "26-seed-phrase-harvest": "asks for a crypto wallet recovery phrase",
-    "27-registry-hijack": "points pip or npm at an untrusted package registry",
+    "02-paraphrased-injection": "reworded instruction override (#28)",
+    "04-zero-width-split": "text is not normalised before matching (zero-width characters) (#27)",
+    "05-homoglyph": "text is not normalised before matching (lookalike letters) (#27)",
+    "06-base64-payload": "base64 is flagged but its decoded content is not scanned (#29)",
+    "07-curl-pipe-shell": "piping a downloaded script into a shell (#30)",
+    "08-natural-exfil": "plain-English instruction to send secret files to a URL (#31)",
+    "09-markdown-image-exfil": "data leaked through a markdown image URL (#32)",
+    "10-python-exfil": "code that posts environment variables to a URL (#33)",
+    "11-impersonation": "persona that denies being an AI (#34)",
+    "12-rug-pull": "instruction to replace the skill with remote content (#35)",
+    "13-tool-poisoning": "hidden side action the user is told nothing about (#36)",
+    "14-delayed-trigger": "dormant instruction that fires on a trigger word (#37)",
+    "15-base64-pipe-shell": "short base64 decoded and piped into a shell (#43)",
+    "16-fake-prerequisite-archive": "fake prerequisite: download a password-protected archive and run it (#44)",
+    "17-paste-site-script": "install script from a paste site pasted into a terminal (#45)",
+    "18-memory-poisoning": "writes instructions into agent memory files (#47)",
+    "19-persistence-service": "installs a system service or cron job (#48)",
+    "20-fake-system-tag": "fake <SYSTEM> tag and developer-mode framing (#49)",
+    "21-suppress-security-warnings": "tells the agent to hide security findings (#50)",
+    "22-cross-tool-hijack": "instruction that changes how other tools run (#51)",
+    "23-unicode-tag-smuggling": "instruction hidden in invisible Unicode tag characters (#54)",
+    "24-bidi-override": "right-to-left override characters hide what text says (#55)",
+    "25-remote-instructions": "fetches instructions from a URL at run time and follows them (#52)",
+    "26-seed-phrase-harvest": "asks for a crypto wallet recovery phrase (#53)",
+    "27-registry-hijack": "points pip or npm at an untrusted package registry (#46)",
 }
 
 # Safe samples that are wrongly flagged: sample -> why it is safe.
 KNOWN_FALSE_POSITIVES = {
-    "b1-security-docs": "documentation that quotes an attack phrase as an example",
+    "b1-security-docs": "documentation that quotes an attack phrase as an example (#38)",
 }
 
 
@@ -133,12 +133,12 @@ def test_safe_sample_is_not_flagged(path):
 # that is reported, once that exists): file -> what is missing.
 SKILL_FOLDER = CORPUS / "skill-folder"
 FOLDER_GAPS = {
-    "scripts/format.pyc": "compiled Python is skipped without being reported",
-    "scripts/install": "script without an extension is skipped (no shebang check)",
-    "scripts/setup.ps1": "PowerShell scripts are skipped",
-    "helper.zip": "password-protected archive is skipped",
-    "plain.zip": "archive contents are not scanned",
-    "guide.docx": "document archive contents are not scanned",
+    "scripts/format.pyc": "compiled Python is skipped without being reported (#42)",
+    "scripts/install": "script without an extension is skipped (no shebang check) (#40)",
+    "scripts/setup.ps1": "PowerShell scripts are skipped (#40)",
+    "helper.zip": "password-protected archive is skipped (#41)",
+    "plain.zip": "archive contents are not scanned (#41)",
+    "guide.docx": "document archive contents are not scanned (#41)",
 }
 
 
