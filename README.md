@@ -216,9 +216,9 @@ The outputs in the comments come from scanning the sample `SKILL.md` above, and 
 | SG-009 | HIGH | Covert Channel | Steganography, DNS tunnelling, timing or covert channels, and data hidden in whitespace. |
 | SG-010 | HIGH | Social Engineering | False urgency, threats to suspend an account, and requests for passwords, codes or credentials. |
 | SG-011 | CRITICAL | Lethal Trifecta (Supply Chain Attack Pattern) | SG-001 prompt injection, a network reference (`http://`, `https://`, `requests`, `urllib`, `socket`, `curl`, `wget`) and file system access (`open(`, `os.listdir`, `os.walk`, `os.scandir`, `pathlib.Path`, `glob.glob`, `shutil`) all in the same text. It does not report line numbers. |
-| SG-012 | MEDIUM | Suspicious URL | URLs with a raw IP address, tunnel or request-capture services (ngrok, webhook.site, requestbin, pipedream), paste sites, URL shorteners, or the TLDs `.xyz`, `.tk`, `.ml`, `.ga`, `.cf`, `.gq` and `.top`. |
+| SG-012 | MEDIUM | Suspicious URL | URLs with a raw IP address, tunnel or request-capture services (ngrok, webhook.site, requestbin, pipedream), paste sites, URL shorteners, or the TLDs `.xyz`, `.tk`, `.ml`, `.ga`, `.cf`, `.gq` and `.top`. |\n| SG-013 | MEDIUM | Well-known Skill Name Impersonation | Frontmatter names that closely resemble canonical skill names or add suspicious suffixes such as `1` or `-pro`. |
 
-That is 5 CRITICAL rules, 6 HIGH rules and 1 MEDIUM rule. Run `skillshield rules` to see each rule with its tags.
+That is 5 CRITICAL rules, 6 HIGH rules and 2 MEDIUM rules. Run `skillshield rules` to see each rule with its tags.
 
 Five rules have an OWASP tag: SG-001 (`owasp-asi01`), SG-002 (`owasp-asi02`), SG-003 (`owasp-asi03`), SG-010 (`owasp-asi04`) and SG-007 (`owasp-asi05`). These ASI IDs are not from the OWASP Agentic Skills Top 10, which uses the IDs AST01 to AST10. The other seven rules have no OWASP tag.
 
