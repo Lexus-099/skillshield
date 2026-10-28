@@ -515,6 +515,86 @@ class TestSkillScanner:
         assert "Scanning" in out.stderr
 
 
+# ── Unreadable files ───────────────────────────────────────────
+
+
+def _make_unreadable(monkeypatch, name):
+    """Path.read_text raises for files called `name`, as it does for a file without read permission."""
+    real = Path.read_text
+
+    def read_text(self, *args, **kwargs):
+        if self.name == name:
+            raise PermissionError(f"[Errno 13] Permission denied: '{self}'")
+        return real(self, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "read_text", read_text)
+
+
+def _run_cli(monkeypatch, *args):
+    from skillguard.cli import main
+
+    monkeypatch.setattr(sys, "argv", ["skillguard", *args])
+    with pytest.raises(SystemExit) as exit_info:
+        main()
+    return exit_info.value.code
+
+
+class TestUnreadableFiles:
+    def test_single_unreadable_file_exits_2(self, tmp_path, monkeypatch, capsys):
+        target = tmp_path / "b.md"
+        target.write_text("ok")
+        _make_unreadable(monkeypatch, "b.md")
+        assert _run_cli(monkeypatch, "scan", str(target)) == 2
+        assert "Permission denied" in capsys.readouterr().out
+
+    def test_single_unreadable_file_json_reports_the_error(self, tmp_path, monkeypatch, capsys):
+        import json
+
+        target = tmp_path / "b.md"
+        target.write_text("ok")
+        _make_unreadable(monkeypatch, "b.md")
+        assert _run_cli(monkeypatch, "scan", str(target), "--format", "json") == 2
+        out = json.loads(capsys.readouterr().out)
+        assert out["risk_level"] == "ERROR"
+        assert "Permission denied" in out["error"]
+
+    def test_readable_safe_file_still_exits_0(self, tmp_path, monkeypatch):
+        target = tmp_path / "a.md"
+        target.write_text(CLEAN_SKILL)
+        assert _run_cli(monkeypatch, "scan", str(target)) == 0
+
+    def test_batch_report_keeps_errors_out_of_flagged(self, tmp_path, monkeypatch):
+        (tmp_path / "a.md").write_text(CLEAN_SKILL)
+        (tmp_path / "b.md").write_text("ok")
+        (tmp_path / "c.md").write_text(PROMPT_INJECTION_SKILL)
+        _make_unreadable(monkeypatch, "b.md")
+        report = SkillScanner().scan_directory(tmp_path)
+        assert report.total_scanned == 3
+        assert report.error_count == 1
+        assert report.flagged_count == 1
+        assert report.safe_count == 1
+        assert report.flag_rate == 0.5  # one of the two files that were read
+
+    def test_directory_summary_and_json_list_unreadable_files(self, tmp_path, monkeypatch, capsys):
+        import json
+
+        (tmp_path / "a.md").write_text(CLEAN_SKILL)
+        (tmp_path / "b.md").write_text("ok")
+        _make_unreadable(monkeypatch, "b.md")
+        summary = SkillScanner().scan_directory(tmp_path).summary()
+        assert "Unreadable:       1" in summary
+        assert "Flagged:          0" in summary
+        assert "b.md" in summary and "Permission denied" in summary
+
+        _run_cli(monkeypatch, "scan", str(tmp_path), "--format", "json")
+        out = json.loads(capsys.readouterr().out)
+        assert out["errors"] == 1
+        assert out["flagged"] == 0
+        errors = [r for r in out["results"] if r["risk_level"] == "ERROR"]
+        assert [r["skill"] for r in errors] == ["b.md"]
+        assert "Permission denied" in errors[0]["error"]
+
+
 # ── CLI ────────────────────────────────────────────────────────
 
 

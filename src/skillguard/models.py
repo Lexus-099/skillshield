@@ -105,8 +105,9 @@ class BatchScanReport:
         results:        Per-skill scan results
         total_scanned:  Total number of skills scanned
         safe_count:     Skills with no findings
-        flagged_count:  Skills with at least one finding
+        flagged_count:  Skills with at least one finding (unreadable files are not counted)
         critical_count: Skills with critical findings
+        error_count:    Files that could not be read (risk level ERROR)
     """
 
     results: list[SkillScanResult]
@@ -122,15 +123,21 @@ class BatchScanReport:
 
     @property
     def flagged_count(self) -> int:
-        return sum(1 for r in self.results if not r.is_safe)
+        return sum(1 for r in self.results if not r.is_safe and r.risk_level != "ERROR")
 
     @property
     def critical_count(self) -> int:
         return sum(1 for r in self.results if r.risk_level == "CRITICAL")
 
     @property
+    def error_count(self) -> int:
+        return sum(1 for r in self.results if r.risk_level == "ERROR")
+
+    @property
     def flag_rate(self) -> float:
-        return round(self.flagged_count / self.total_scanned, 4) if self.total_scanned else 0.0
+        """Share of the files that were read that got flagged; unreadable files are left out."""
+        read = self.total_scanned - self.error_count
+        return round(self.flagged_count / read, 4) if read else 0.0
 
     @property
     def critical_findings_total(self) -> list[Finding]:
@@ -149,6 +156,7 @@ class BatchScanReport:
             f"  Safe:             {self.safe_count}",
             f"  Flagged:          {self.flagged_count}",
             f"  Critical:         {self.critical_count}",
+            f"  Unreadable:       {self.error_count}",
             f"  Flag rate:        {self.flag_rate:.0%}",
             "-" * 64,
         ]
@@ -165,6 +173,12 @@ class BatchScanReport:
                         lines.append(f"         -> {f.rule_id}: {f.name}")
                 if len(by_level.get(level, [])) > 5:
                     lines.append(f"    ... and {len(by_level[level]) - 5} more")
+
+        # Every unreadable file is listed: each one is a file the scan could not vouch for.
+        if "ERROR" in by_level:
+            lines.append(f"  UNREADABLE ({len(by_level['ERROR'])})")
+            for r in by_level["ERROR"]:
+                lines.append(f"    {r.skill_name}: {r.error}")
 
         lines += ["=" * 64, ""]
         return "\n".join(lines)

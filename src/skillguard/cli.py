@@ -120,12 +120,14 @@ def cmd_scan(args) -> int:
                 "total": report.total_scanned,
                 "flagged": report.flagged_count,
                 "critical": report.critical_count,
+                "errors": report.error_count,
                 "flag_rate": report.flag_rate,
                 "results": [
                     {
                         "skill": r.skill_name,
                         "risk_level": r.risk_level,
                         "risk_score": r.risk_score,
+                        **({"error": r.error} if r.error else {}),
                         "findings": [
                             {
                                 "id": f.rule_id,
@@ -164,6 +166,7 @@ def cmd_scan(args) -> int:
             "skill": results[0].skill_name,
             "risk_level": results[0].risk_level,
             "risk_score": results[0].risk_score,
+            **({"error": results[0].error} if results[0].error else {}),
             "findings": [
                 {
                     "id": f.rule_id,
@@ -186,6 +189,9 @@ def cmd_scan(args) -> int:
         for result in results:
             _print_result(result, verbose=args.verbose)
 
+    # A file the scanner could not read must not look like a clean pass in CI; 2 also means "not found".
+    if results[0].risk_level == "ERROR":
+        return 2
     return 1 if results[0].risk_level in ("CRITICAL", "HIGH") else 0
 
 
