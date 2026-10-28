@@ -8,10 +8,10 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-import skillguard
-from skillguard import SkillScanner
-from skillguard.models import SkillScanResult
-from skillguard.sarif import report_to_sarif, results_to_sarif, to_sarif_string
+import skillshield
+from skillshield import SkillScanner
+from skillshield.models import SkillScanResult
+from skillshield.sarif import report_to_sarif, results_to_sarif, to_sarif_string
 
 # ── Fixture skill content ──────────────────────────────────────
 
@@ -61,7 +61,7 @@ class TestSarifTopLevel:
 
     def test_tool_driver_present(self):
         run = results_to_sarif([_scan(CLEAN_SKILL)])["runs"][0]
-        assert run["tool"]["driver"]["name"] == "skillguard"
+        assert run["tool"]["driver"]["name"] == "skillshield"
 
     def test_tool_driver_has_version(self):
         run = results_to_sarif([_scan(CLEAN_SKILL)])["runs"][0]
@@ -69,7 +69,7 @@ class TestSarifTopLevel:
 
     def test_tool_driver_version_is_package_version(self):
         run = results_to_sarif([_scan(CLEAN_SKILL)])["runs"][0]
-        assert run["tool"]["driver"]["version"] == skillguard.__version__
+        assert run["tool"]["driver"]["version"] == skillshield.__version__
 
     def test_tool_driver_has_information_uri(self):
         run = results_to_sarif([_scan(CLEAN_SKILL)])["runs"][0]
@@ -276,7 +276,7 @@ class TestCliSarifFormat:
         skill = tmp_path / "evil.md"
         skill.write_text(INJECTION_SKILL)
         out = subprocess.run(
-            [sys.executable, "-m", "skillguard.cli", "scan", str(skill), "--format", "sarif"],
+            [sys.executable, "-m", "skillshield.cli", "scan", str(skill), "--format", "sarif"],
             capture_output=True,
             text=True,
         )
@@ -291,7 +291,7 @@ class TestCliSarifFormat:
         (tmp_path / "evil.md").write_text(INJECTION_SKILL)
         (tmp_path / "clean.md").write_text(CLEAN_SKILL)
         out = subprocess.run(
-            [sys.executable, "-m", "skillguard.cli", "scan", str(tmp_path), "--format", "sarif"],
+            [sys.executable, "-m", "skillshield.cli", "scan", str(tmp_path), "--format", "sarif"],
             capture_output=True,
             text=True,
         )
@@ -304,7 +304,7 @@ class TestCliSarifFormat:
         skill = tmp_path / "clean.md"
         skill.write_text(CLEAN_SKILL)
         out = subprocess.run(
-            [sys.executable, "-m", "skillguard.cli", "scan", str(skill), "--format", "sarif"],
+            [sys.executable, "-m", "skillshield.cli", "scan", str(skill), "--format", "sarif"],
             capture_output=True,
             text=True,
         )

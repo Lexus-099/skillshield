@@ -37,17 +37,18 @@ dev = [
 ]
 
 [project.scripts]
-skillguard = "skillguard.cli:main"
+skillshield = "skillshield.cli:main"
+skillguard = "skillshield.cli:legacy_main"
 
 [project.urls]
-Homepage = "https://github.com/obielin/skillguard"
-"Bug Tracker" = "https://github.com/obielin/skillguard/issues"
+Homepage = "https://github.com/obielin/skillshield"
+"Bug Tracker" = "https://github.com/obielin/skillshield/issues"
 
 [tool.setuptools.packages.find]
 where = ["src"]
 
 [tool.setuptools.dynamic]
-version = { attr = "skillguard.__version__" }
+version = { attr = "skillshield.__version__" }
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

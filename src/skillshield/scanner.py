@@ -1,4 +1,4 @@
-"""Core scanner engine for skillguard."""
+"""Core scanner engine for skillshield."""
 
 from __future__ import annotations
 
@@ -7,8 +7,8 @@ import time
 from pathlib import Path
 from typing import Callable
 
-from skillguard.models import BatchScanReport, Finding, SkillScanResult
-from skillguard.rules import ALL_RULES, Rule, Severity
+from skillshield.models import BatchScanReport, Finding, SkillScanResult
+from skillshield.rules import ALL_RULES, Rule, Severity
 
 # Severity weights for risk score calculation
 _SEVERITY_WEIGHTS = {

@@ -1,11 +1,11 @@
-"""Data models for skillguard scan results."""
+"""Data models for skillshield scan results."""
 
 from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
 
-from skillguard.rules import Rule, Severity
+from skillshield.rules import Rule, Severity
 
 
 @dataclass
@@ -150,7 +150,7 @@ class BatchScanReport:
         lines = [
             "",
             "=" * 64,
-            "  SKILLGUARD -- BATCH SCAN REPORT",
+            "  SKILLSHIELD -- BATCH SCAN REPORT",
             "=" * 64,
             f"  Skills scanned:   {self.total_scanned}",
             f"  Safe:             {self.safe_count}",

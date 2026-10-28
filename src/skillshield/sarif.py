@@ -1,5 +1,5 @@
 """
-SARIF 2.1.0 output format for skillguard.
+SARIF 2.1.0 output format for skillshield.
 
 Converts SkillScanResult / BatchScanReport objects into a valid SARIF log
 that can be uploaded to GitHub Advanced Security (Security tab).
@@ -12,18 +12,18 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from skillguard import __version__
-from skillguard.models import BatchScanReport, SkillScanResult
-from skillguard.rules import ALL_RULES, Rule, Severity
+from skillshield import __version__
+from skillshield.models import BatchScanReport, SkillScanResult
+from skillshield.rules import ALL_RULES, Rule, Severity
 
 _SARIF_SCHEMA = (
     "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json"
 )
-_TOOL_NAME = "skillguard"
+_TOOL_NAME = "skillshield"
 _TOOL_VERSION = __version__
-_TOOL_INFO_URI = "https://github.com/obielin/skillguard"
+_TOOL_INFO_URI = "https://github.com/obielin/skillshield"
 
-# Map skillguard Severity to SARIF level
+# Map skillshield Severity to SARIF level
 _SEVERITY_TO_LEVEL: dict[Severity, str] = {
     Severity.CRITICAL: "error",
     Severity.HIGH: "error",
@@ -76,8 +76,8 @@ def results_to_sarif(results: list[SkillScanResult]) -> dict[str, Any]:
 
     Example::
 
-        from skillguard import SkillScanner
-        from skillguard.sarif import results_to_sarif
+        from skillshield import SkillScanner
+        from skillshield.sarif import results_to_sarif
         import json
 
         scanner = SkillScanner()

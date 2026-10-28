@@ -1,5 +1,5 @@
 """
-Detection rules for skillguard.
+Detection rules for skillshield.
 Each rule is a dataclass with a name, severity, description, and match function.
 Zero external dependencies -- pure Python stdlib.
 """

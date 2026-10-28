@@ -1,4 +1,4 @@
-"""Tests for skillguard. Run: pytest tests/ -v"""
+"""Tests for skillshield. Run: pytest tests/ -v"""
 
 from __future__ import annotations
 
@@ -9,8 +9,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from skillguard import ALL_RULES, Severity, SkillScanner
-from skillguard.rules import (
+from skillshield import ALL_RULES, Severity, SkillScanner
+from skillshield.rules import (
     RULE_DATA_EXFIL,
     RULE_IDENTITY_HIJACK,
     RULE_LETHAL_TRIFECTA,
@@ -421,7 +421,7 @@ class TestSkillScanner:
         skills = {"a": CLEAN_SKILL, "b": LETHAL_TRIFECTA_SKILL}
         report = scanner.scan_texts(skills)
         summary = report.summary()
-        assert "SKILLGUARD" in summary
+        assert "SKILLSHIELD" in summary
         assert isinstance(summary, str)
 
     def test_repr_result(self, scanner):
@@ -451,7 +451,7 @@ class TestSkillScanner:
     def test_custom_rules(self):
         import re
 
-        from skillguard.rules import Rule, Severity
+        from skillshield.rules import Rule, Severity
 
         custom = Rule(
             id="CUSTOM-001",
@@ -500,7 +500,7 @@ class TestSkillScanner:
             [
                 sys.executable,
                 "-m",
-                "skillguard.cli",
+                "skillshield.cli",
                 "scan",
                 str(tmp_path),
                 "--format",
@@ -531,9 +531,9 @@ def _make_unreadable(monkeypatch, name):
 
 
 def _run_cli(monkeypatch, *args):
-    from skillguard.cli import main
+    from skillshield.cli import main
 
-    monkeypatch.setattr(sys, "argv", ["skillguard", *args])
+    monkeypatch.setattr(sys, "argv", ["skillshield", *args])
     with pytest.raises(SystemExit) as exit_info:
         main()
     return exit_info.value.code
@@ -599,11 +599,11 @@ class TestUnreadableFiles:
 
 
 def test_cli_version_prints_package_version(monkeypatch, capsys):
-    import skillguard
-    from skillguard.cli import main
+    import skillshield
+    from skillshield.cli import main
 
-    monkeypatch.setattr(sys, "argv", ["skillguard", "--version"])
+    monkeypatch.setattr(sys, "argv", ["skillshield", "--version"])
     with pytest.raises(SystemExit) as exit_info:
         main()
     assert exit_info.value.code == 0
-    assert capsys.readouterr().out.strip() == f"skillguard {skillguard.__version__}"
+    assert capsys.readouterr().out.strip() == f"skillshield {skillshield.__version__}"
