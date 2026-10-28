@@ -264,7 +264,7 @@ SkillShield matches known patterns. It is a first line of defence, not a guarant
 - **Some techniques have no rule yet**, such as piping a downloaded script into a shell, leaking data through a markdown image URL, or an instruction that waits for a trigger word.
 - **Documentation about attacks can be flagged.** A guide that quotes an attack phrase as an example may be reported as if it were an attack.
 
-`tests/test_redteam.py` holds a corpus of realistic attacks and safe look-alikes. Each technique SkillShield does not catch yet is marked as a known gap and has an open issue labelled `detection-gap`. Fixing one is a good way to contribute.
+[docs/threat-coverage.md](docs/threat-coverage.md) lists the attack techniques reported against agent skills in 2025–2026, with sources, and what SkillShield covers today. `tests/test_redteam.py` holds a corpus of realistic attacks and safe look-alikes. Each technique SkillShield does not catch yet is marked as a known gap and has an open issue labelled `detection-gap`. Fixing one is a good way to contribute.
 
 ---
 

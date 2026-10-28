@@ -39,27 +39,55 @@ EXPECTED = {
     "12-rug-pull": Severity.CRITICAL,
     "13-tool-poisoning": Severity.HIGH,
     "14-delayed-trigger": Severity.HIGH,
+    "15-base64-pipe-shell": Severity.CRITICAL,
+    "16-fake-prerequisite-archive": Severity.HIGH,
+    "17-paste-site-script": Severity.HIGH,
+    "18-memory-poisoning": Severity.HIGH,
+    "19-persistence-service": Severity.HIGH,
+    "20-fake-system-tag": Severity.CRITICAL,
+    "21-suppress-security-warnings": Severity.HIGH,
+    "22-cross-tool-hijack": Severity.HIGH,
+    "23-unicode-tag-smuggling": Severity.CRITICAL,
+    "24-bidi-override": Severity.HIGH,
+    "25-remote-instructions": Severity.HIGH,
+    "26-seed-phrase-harvest": Severity.CRITICAL,
+    "27-registry-hijack": Severity.HIGH,
+    "28-whitespace-inflation": Severity.CRITICAL,
+    "29-description-injection": Severity.CRITICAL,
 }
 
 # Malicious samples not yet flagged at their expected severity: sample -> what is missing.
 KNOWN_GAPS = {
-    "02-paraphrased-injection": "reworded instruction override",
-    "04-zero-width-split": "text is not normalised before matching (zero-width characters)",
-    "05-homoglyph": "text is not normalised before matching (lookalike letters)",
-    "06-base64-payload": "base64 is flagged but its decoded content is not scanned",
-    "07-curl-pipe-shell": "piping a downloaded script into a shell",
-    "08-natural-exfil": "plain-English instruction to send secret files to a URL",
-    "09-markdown-image-exfil": "data leaked through a markdown image URL",
-    "10-python-exfil": "code that posts environment variables to a URL",
-    "11-impersonation": "persona that denies being an AI",
-    "12-rug-pull": "instruction to replace the skill with remote content",
-    "13-tool-poisoning": "hidden side action the user is told nothing about",
-    "14-delayed-trigger": "dormant instruction that fires on a trigger word",
+    "02-paraphrased-injection": "reworded instruction override (#28)",
+    "04-zero-width-split": "text is not normalised before matching (zero-width characters) (#27)",
+    "05-homoglyph": "text is not normalised before matching (lookalike letters) (#27)",
+    "06-base64-payload": "base64 is flagged but its decoded content is not scanned (#29)",
+    "07-curl-pipe-shell": "piping a downloaded script into a shell (#30)",
+    "08-natural-exfil": "plain-English instruction to send secret files to a URL (#31)",
+    "09-markdown-image-exfil": "data leaked through a markdown image URL (#32)",
+    "10-python-exfil": "code that posts environment variables to a URL (#33)",
+    "11-impersonation": "persona that denies being an AI (#34)",
+    "12-rug-pull": "instruction to replace the skill with remote content (#35)",
+    "13-tool-poisoning": "hidden side action the user is told nothing about (#36)",
+    "14-delayed-trigger": "dormant instruction that fires on a trigger word (#37)",
+    "15-base64-pipe-shell": "short base64 decoded and piped into a shell (#43)",
+    "16-fake-prerequisite-archive": "fake prerequisite: download a password-protected archive and run it (#44)",
+    "17-paste-site-script": "install script from a paste site pasted into a terminal (#45)",
+    "18-memory-poisoning": "writes instructions into agent memory files (#47)",
+    "19-persistence-service": "installs a system service or cron job (#48)",
+    "20-fake-system-tag": "fake <SYSTEM> tag and developer-mode framing (#49)",
+    "21-suppress-security-warnings": "tells the agent to hide security findings (#50)",
+    "22-cross-tool-hijack": "instruction that changes how other tools run (#51)",
+    "23-unicode-tag-smuggling": "instruction hidden in invisible Unicode tag characters (#54)",
+    "24-bidi-override": "right-to-left override characters hide what text says (#55)",
+    "25-remote-instructions": "fetches instructions from a URL at run time and follows them (#52)",
+    "26-seed-phrase-harvest": "asks for a crypto wallet recovery phrase (#53)",
+    "27-registry-hijack": "points pip or npm at an untrusted package registry (#46)",
 }
 
 # Safe samples that are wrongly flagged: sample -> why it is safe.
 KNOWN_FALSE_POSITIVES = {
-    "b1-security-docs": "documentation that quotes an attack phrase as an example",
+    "b1-security-docs": "documentation that quotes an attack phrase as an example (#38)",
 }
 
 
@@ -98,3 +126,30 @@ def test_malicious_sample_is_flagged(path):
 def test_safe_sample_is_not_flagged(path):
     result = SkillScanner().scan_file(path)
     assert result.findings == [], f"{path.stem}: {[f.rule_id for f in result.findings]}"
+
+
+# Files in a skill folder that carry a payload SkillShield does not look at yet.
+# Each must appear in a directory scan with a finding (or as an unscanned file
+# that is reported, once that exists): file -> what is missing.
+SKILL_FOLDER = CORPUS / "skill-folder"
+FOLDER_GAPS = {
+    "scripts/format.pyc": "compiled Python is skipped without being reported (#42)",
+    "scripts/install": "script without an extension is skipped (no shebang check) (#40)",
+    "scripts/setup.ps1": "PowerShell scripts are skipped (#40)",
+    "helper.zip": "password-protected archive is skipped (#41)",
+    "plain.zip": "archive contents are not scanned (#41)",
+    "guide.docx": "document archive contents are not scanned (#41)",
+}
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        pytest.param(name, id=name, marks=pytest.mark.xfail(reason=reason, strict=True))
+        for name, reason in FOLDER_GAPS.items()
+    ],
+)
+def test_payload_file_in_skill_folder_is_flagged(name):
+    report = SkillScanner().scan_directory(SKILL_FOLDER)
+    flagged = {r.skill_name for r in report.results if r.findings or r.risk_level == "ERROR"}
+    assert Path(name).name in flagged, f"{name} was not flagged; flagged: {sorted(flagged)}"
