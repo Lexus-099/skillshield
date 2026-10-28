@@ -39,6 +39,21 @@ EXPECTED = {
     "12-rug-pull": Severity.CRITICAL,
     "13-tool-poisoning": Severity.HIGH,
     "14-delayed-trigger": Severity.HIGH,
+    "15-base64-pipe-shell": Severity.CRITICAL,
+    "16-fake-prerequisite-archive": Severity.HIGH,
+    "17-paste-site-script": Severity.HIGH,
+    "18-memory-poisoning": Severity.HIGH,
+    "19-persistence-service": Severity.HIGH,
+    "20-fake-system-tag": Severity.CRITICAL,
+    "21-suppress-security-warnings": Severity.HIGH,
+    "22-cross-tool-hijack": Severity.HIGH,
+    "23-unicode-tag-smuggling": Severity.CRITICAL,
+    "24-bidi-override": Severity.HIGH,
+    "25-remote-instructions": Severity.HIGH,
+    "26-seed-phrase-harvest": Severity.CRITICAL,
+    "27-registry-hijack": Severity.HIGH,
+    "28-whitespace-inflation": Severity.CRITICAL,
+    "29-description-injection": Severity.CRITICAL,
 }
 
 # Malicious samples not yet flagged at their expected severity: sample -> what is missing.
@@ -55,6 +70,19 @@ KNOWN_GAPS = {
     "12-rug-pull": "instruction to replace the skill with remote content",
     "13-tool-poisoning": "hidden side action the user is told nothing about",
     "14-delayed-trigger": "dormant instruction that fires on a trigger word",
+    "15-base64-pipe-shell": "short base64 decoded and piped into a shell",
+    "16-fake-prerequisite-archive": "fake prerequisite: download a password-protected archive and run it",
+    "17-paste-site-script": "install script from a paste site pasted into a terminal",
+    "18-memory-poisoning": "writes instructions into agent memory files",
+    "19-persistence-service": "installs a system service or cron job",
+    "20-fake-system-tag": "fake <SYSTEM> tag and developer-mode framing",
+    "21-suppress-security-warnings": "tells the agent to hide security findings",
+    "22-cross-tool-hijack": "instruction that changes how other tools run",
+    "23-unicode-tag-smuggling": "instruction hidden in invisible Unicode tag characters",
+    "24-bidi-override": "right-to-left override characters hide what text says",
+    "25-remote-instructions": "fetches instructions from a URL at run time and follows them",
+    "26-seed-phrase-harvest": "asks for a crypto wallet recovery phrase",
+    "27-registry-hijack": "points pip or npm at an untrusted package registry",
 }
 
 # Safe samples that are wrongly flagged: sample -> why it is safe.
@@ -98,3 +126,30 @@ def test_malicious_sample_is_flagged(path):
 def test_safe_sample_is_not_flagged(path):
     result = SkillScanner().scan_file(path)
     assert result.findings == [], f"{path.stem}: {[f.rule_id for f in result.findings]}"
+
+
+# Files in a skill folder that carry a payload SkillShield does not look at yet.
+# Each must appear in a directory scan with a finding (or as an unscanned file
+# that is reported, once that exists): file -> what is missing.
+SKILL_FOLDER = CORPUS / "skill-folder"
+FOLDER_GAPS = {
+    "scripts/format.pyc": "compiled Python is skipped without being reported",
+    "scripts/install": "script without an extension is skipped (no shebang check)",
+    "scripts/setup.ps1": "PowerShell scripts are skipped",
+    "helper.zip": "password-protected archive is skipped",
+    "plain.zip": "archive contents are not scanned",
+    "guide.docx": "document archive contents are not scanned",
+}
+
+
+@pytest.mark.parametrize(
+    "name",
+    [
+        pytest.param(name, id=name, marks=pytest.mark.xfail(reason=reason, strict=True))
+        for name, reason in FOLDER_GAPS.items()
+    ],
+)
+def test_payload_file_in_skill_folder_is_flagged(name):
+    report = SkillScanner().scan_directory(SKILL_FOLDER)
+    flagged = {r.skill_name for r in report.results if r.findings or r.risk_level == "ERROR"}
+    assert Path(name).name in flagged, f"{name} was not flagged; flagged: {sorted(flagged)}"

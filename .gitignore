@@ -5,3 +5,6 @@ dist/
 .venv/
 .pytest_cache/
 build/
+
+# Red-team fixture: compiled Python with a defanged payload
+!tests/fixtures/redteam/skill-folder/scripts/format.pyc

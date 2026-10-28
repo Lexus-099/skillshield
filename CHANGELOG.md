@@ -6,7 +6,8 @@ All notable changes to this project are listed here. The format follows [Keep a 
 
 ### Added
 
-- A red-team corpus (`tests/fixtures/redteam/`, `tests/test_redteam.py`): 14 defanged malicious skills, one per attack technique, and 4 safe skills that look suspicious. Techniques SkillShield does not catch yet are tracked as known gaps.
+- A red-team corpus (`tests/fixtures/redteam/`, `tests/test_redteam.py`): 29 defanged malicious skills, one per attack technique, 4 safe skills that look suspicious, and a skill folder that hides its payload outside `SKILL.md`. Techniques SkillShield does not catch yet are tracked as known gaps.
+- `docs/threat-coverage.md`: the attack techniques reported against agent skills in 2025–2026, with sources, and how far SkillShield covers each.
 - A Limitations section in the README.
 
 ## [1.2.0]
