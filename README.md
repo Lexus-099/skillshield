@@ -2,7 +2,7 @@
 
 Security scanner for AI agent skills. It looks for prompt injection, data exfiltration and malicious payloads in a skill before you install it.
 
-[![Tests](https://img.shields.io/badge/Tests-146%20passing-brightgreen?style=flat-square)](tests/)
+[![Tests](https://img.shields.io/badge/Tests-152%20passing-brightgreen?style=flat-square)](tests/)
 [![PyPI](https://img.shields.io/pypi/v/skillshield?style=flat-square)](https://pypi.org/project/skillshield/)
 [![Dependencies](https://img.shields.io/badge/Dependencies-zero-brightgreen?style=flat-square)](pyproject.toml)
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue?style=flat-square)](pyproject.toml)
@@ -252,6 +252,19 @@ The risk level comes from the findings and the score:
 | The file could not be read | ERROR |
 
 `--min-severity` removes findings before the score is worked out, so it changes the score and the level.
+
+---
+
+## Limitations
+
+SkillShield matches known patterns. It is a first line of defence, not a guarantee:
+
+- **Reworded attacks can get through.** A rule that catches "ignore all previous instructions" may miss the same instruction said another way.
+- **Hidden characters are not yet removed before matching.** Zero-width characters inside a word, or lookalike letters from other alphabets, can stop a rule from matching.
+- **Some techniques have no rule yet**, such as piping a downloaded script into a shell, leaking data through a markdown image URL, or an instruction that waits for a trigger word.
+- **Documentation about attacks can be flagged.** A guide that quotes an attack phrase as an example may be reported as if it were an attack.
+
+`tests/test_redteam.py` holds a corpus of realistic attacks and safe look-alikes. Each technique SkillShield does not catch yet is marked as a known gap and has an open issue labelled `detection-gap`. Fixing one is a good way to contribute.
 
 ---
 

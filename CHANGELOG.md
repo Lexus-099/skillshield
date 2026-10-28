@@ -4,6 +4,11 @@ All notable changes to this project are listed here. The format follows [Keep a 
 
 ## [Unreleased]
 
+### Added
+
+- A red-team corpus (`tests/fixtures/redteam/`, `tests/test_redteam.py`): 14 defanged malicious skills, one per attack technique, and 4 safe skills that look suspicious. Techniques SkillShield does not catch yet are tracked as known gaps.
+- A Limitations section in the README.
+
 ## [1.2.0]
 
 ### Added
