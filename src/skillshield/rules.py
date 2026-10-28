@@ -447,6 +447,97 @@ RULE_SUSPICIOUS_URLS = Rule(
 )
 
 
+
+# ── SG-013: Well-known skill name impersonation ─────────────────
+
+from pathlib import Path
+
+_FRONTMATTER_NAME = re.compile(r"^---\\s*\\n(.*?)\\n---\\s*(?:\\n|$)", re.DOTALL)
+_NAME_FIELD = re.compile(r"^name\\s*:\\s*(.*?)\\s*$", re.MULTILINE)
+
+
+def _well_known_names() -> set[str]:
+    """Load the bundled, extendable list of legitimate skill names."""
+    names_path = Path(__file__).parent / "data" / "well_known_names.txt"
+    try:
+        return {
+            line.strip().casefold()
+            for line in names_path.read_text(encoding="utf-8").splitlines()
+            if line.strip() and not line.lstrip().startswith("#")
+        }
+    except OSError:
+        return {"clawhub", "github", "weather", "web-search"}
+
+
+def _edit_distance_at_most_two(left: str, right: str) -> int:
+    """Levenshtein distance with an early cutoff at two edits."""
+    if abs(len(left) - len(right)) > 2:
+        return 3
+    previous = list(range(len(right) + 1))
+    for i, char_left in enumerate(left, 1):
+        current = [i]
+        row_min = i
+        for j, char_right in enumerate(right, 1):
+            value = min(
+                current[j - 1] + 1,
+                previous[j] + 1,
+                previous[j - 1] + (char_left != char_right),
+            )
+            current.append(value)
+            row_min = min(row_min, value)
+        if row_min > 2:
+            return 3
+        previous = current
+    return previous[-1]
+
+
+def _check_brand_name_impersonation(text: str) -> list[str]:
+    """Flag suspicious near-matches in SKILL.md frontmatter names only."""
+    frontmatter = _FRONTMATTER_NAME.match(text)
+    if not frontmatter:
+        return []
+    name_match = _NAME_FIELD.search(frontmatter.group(1))
+    if not name_match:
+        return []
+    name = name_match.group(1).strip().strip("'\\\"").casefold()
+    if not name or any(char.isspace() for char in name):
+        return []
+    known_names = _well_known_names()
+    if name in known_names:
+        return []
+    normalized = re.sub(r"[^a-z0-9]", "", name)
+    if not normalized:
+        return []
+    for known in known_names:
+        known_normalized = re.sub(r"[^a-z0-9]", "", known)
+        if not known_normalized or normalized == known_normalized:
+            continue
+        if normalized.startswith(known_normalized) and normalized[len(known_normalized):] in {
+            "1", "2", "pro", "official", "app", "ai"
+        }:
+            return [name_match.group(1).strip()]
+        if _edit_distance_at_most_two(normalized, known_normalized) <= 2:
+            return [name_match.group(1).strip()]
+    return []
+
+
+RULE_BRAND_NAME_IMPERSONATION = Rule(
+    id="SG-013",
+    name="Well-known Skill Name Impersonation",
+    severity=Severity.MEDIUM,
+    description=(
+        "The skill's frontmatter name closely resembles a well-known skill name, "
+        "which may indicate impersonation or typosquatting."
+    ),
+    remediation=(
+        "Verify the publisher and source before installing. If this is an intentional "
+        "name, document the relationship or choose a distinct name."
+    ),
+    check_fn=_check_brand_name_impersonation,
+    tags=["typosquatting", "brand-impersonation", "supply-chain"],
+)
+
+
 # ── All rules ──────────────────────────────────────────────────
 
 ALL_RULES: list[Rule] = [
@@ -462,4 +553,5 @@ ALL_RULES: list[Rule] = [
     RULE_COVERT_CHANNEL,
     RULE_SOCIAL_ENG,
     RULE_SUSPICIOUS_URLS,
+    RULE_BRAND_NAME_IMPERSONATION,
 ]
