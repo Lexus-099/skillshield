@@ -7,6 +7,7 @@ Zero external dependencies -- pure Python stdlib.
 from __future__ import annotations
 
 import re
+from pathlib import Path
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Callable
@@ -449,8 +450,6 @@ RULE_SUSPICIOUS_URLS = Rule(
 
 
 # ── SG-013: Well-known skill name impersonation ─────────────────
-
-from pathlib import Path
 
 _FRONTMATTER_NAME = re.compile(r"^---\\s*\\n(.*?)\\n---\\s*(?:\\n|$)", re.DOTALL)
 _NAME_FIELD = re.compile(r"^name\\s*:\\s*(.*?)\\s*$", re.MULTILINE)
