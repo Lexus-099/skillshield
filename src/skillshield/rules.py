@@ -589,10 +589,15 @@ def _extract_name_scalar(frontmatter: str) -> tuple[str, str]:
             return "", ""
 
         scalar = line.strip()
-        if not is_block_scalar_header and (
-            scalar.startswith("- ")
-            or re.match(r"""^[^'"#][^:\r\n]*:[ \t]""", scalar)
-        ):
+        if is_block_scalar_header:
+            # Block scalar content is literal text; quotes and # are not YAML
+            # scalar syntax here.
+            return scalar, scalar
+
+        # In an empty plain value, indented comment lines do not end the search.
+        if scalar.startswith("#"):
+            continue
+        if scalar.startswith("- ") or re.match(r"""^[^'"#][^:\r\n]*:[ \t]""", scalar):
             return "", ""
 
         parsed_name = _parse_name_scalar(scalar)
