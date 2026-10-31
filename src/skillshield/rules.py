@@ -452,7 +452,7 @@ RULE_SUSPICIOUS_URLS = Rule(
 
 _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 _NAME_FIELD = re.compile(
-    r"""^(?:name|'name'|"name")[ \t]*:[ \t]*(?P<value>"(?:\\(?:\r?\n[ \t]*|\\.|[^"\\\r\n])*"|'(?:''|[^'])*'|[^\r\n]*)[ \t]*(?:#[^\r\n]*)?)\r?$""",
+    r"""^(?:name|'name'|"name")[ \t]*:[ \t]*(?P<value>"(?:\\(?:\r\n|[\r\n])[ \t]*|\\.|[^"\\\r\n])*"|'(?:''|[^'])*'|[^\r\n]*)[ \t]*(?:#[^\r\n]*)?\r?$""",
     re.MULTILINE,
 )
 
