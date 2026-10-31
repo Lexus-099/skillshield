@@ -627,7 +627,6 @@ class TestBrandNameImpersonationRule:
         result = self._scan_name("polymarket-pro")
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
-
     def test_detects_numeric_suffix_before_unquoted_yaml_comment(self):
         result = self._scan_name("clawhub1 # release")
         assert "SG-015" in [finding.rule_id for finding in result.findings]
