@@ -658,10 +658,26 @@ class TestBrandNameImpersonationRule:
         result = self._scan_name(name)
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
+        finding = next(f for f in result.findings if f.rule_id == "SG-015")
+        assert finding.line_numbers == [2]
+
     def test_detects_indented_scalar_after_empty_name(self):
         skill = (
             "---\n"
             "name:\n"
+            "  clawhub1\n"
+            "description: test\n"
+            "---\n"
+            "A harmless skill."
+        )
+        result = SkillScanner().scan_text(skill)
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    def test_skips_indented_comments_before_empty_name_scalar(self):
+        skill = (
+            "---\n"
+            "name:\n"
+            "  # metadata comment\n"
             "  clawhub1\n"
             "description: test\n"
             "---\n"
