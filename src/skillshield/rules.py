@@ -454,7 +454,7 @@ _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 _NAME_FIELD = re.compile(r"^name\s*:\s*(.*?)\s*$", re.MULTILINE)
 
 def _parse_name_scalar(value: str) -> str:
-    """Parse a frontmatter name scalar without treating quoted hashes as comments."""
+    """Parse a frontmatter name scalar using YAML comment and escape rules."""
     value = value.strip()
     if not value:
         return ""
@@ -466,34 +466,88 @@ def _parse_name_scalar(value: str) -> str:
                 return value[:index].rstrip()
         return value
 
+    if quote == "'":
+        index = 1
+        decoded = []
+        while index < len(value):
+            char = value[index]
+            if char == "'":
+                if index + 1 < len(value) and value[index + 1] == "'":
+                    decoded.append("'")
+                    index += 2
+                    continue
+                trailing = value[index + 1 :].strip()
+                return "".join(decoded) if not trailing or trailing.startswith("#") else ""
+            decoded.append(char)
+            index += 1
+        return ""
+
+    escapes = {
+        "0": "\0",
+        "a": "\x07",
+        "b": "\x08",
+        "t": "\t",
+        "n": "\n",
+        "v": "\x0b",
+        "f": "\x0c",
+        "r": "\r",
+        "e": "\x1b",
+        " ": " ",
+        '"': '"',
+        "/": "/",
+        "\\": "\\",
+        "N": "\x85",
+        "_": "\xa0",
+        "L": "\u2028",
+        "P": "\u2029",
+    }
+    hex_lengths = {"x": 2, "u": 4, "U": 8}
+    decoded = []
     index = 1
-    escaped = False
     while index < len(value):
         char = value[index]
-        if quote == "'" and char == "'":
-            if index + 1 < len(value) and value[index + 1] == "'":
-                index += 2
-                continue
-            trailing = value[index + 1 :]
-            if trailing and not trailing[0].isspace():
-                return ""
-            trailing = trailing.strip()
-            if not trailing or trailing.startswith("#"):
-                return value[1:index].replace("''", "'")
-            return ""
-
-        if quote == '"' and char == "\\" and not escaped:
-            escaped = True
+        if char == '"':
+            trailing = value[index + 1 :].strip()
+            return "".join(decoded) if not trailing or trailing.startswith("#") else ""
+        if char != "\\":
+            decoded.append(char)
             index += 1
             continue
-        if quote == '"' and char == '"' and not escaped:
-            trailing = value[index + 1 :]
-            if trailing and not trailing[0].isspace():
-                return ""
-            trailing = trailing.strip()
-            return value[1:index] if not trailing or trailing.startswith("#") else ""
-        escaped = False
+
         index += 1
+        if index >= len(value):
+            return ""
+        escape = value[index]
+        if escape in escapes:
+            decoded.append(escapes[escape])
+            index += 1
+            continue
+        if escape in hex_lengths:
+            length = hex_lengths[escape]
+            digits = value[index + 1 : index + 1 + length]
+            if len(digits) != length or not all(
+                digit in "0123456789abcdefABCDEF" for digit in digits
+            ):
+                return ""
+            codepoint = int(digits, 16)
+            if codepoint > 0x10FFFF or 0xD800 <= codepoint <= 0xDFFF:
+                return ""
+            decoded.append(chr(codepoint))
+            index += length + 1
+            continue
+        if escape == "\n":
+            index += 1
+            while index < len(value) and value[index] in " \t":
+                index += 1
+            continue
+        if escape == "\r":
+            index += 1
+            if index < len(value) and value[index] == "\n":
+                index += 1
+            while index < len(value) and value[index] in " \t":
+                index += 1
+            continue
+        return ""
 
     return ""
 
