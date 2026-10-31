@@ -627,6 +627,19 @@ class TestBrandNameImpersonationRule:
         result = self._scan_name("polymarket-pro")
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
+
+    def test_detects_numeric_suffix_before_unquoted_yaml_comment(self):
+        result = self._scan_name("clawhub1 # release")
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    def test_preserves_hash_inside_quoted_name(self):
+        result = self._scan_name('"clawhub#1"')
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    def test_detects_punctuation_only_name_variant(self):
+        result = self._scan_name("claw-hub")
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
     def test_allows_exact_known_name(self):
         result = self._scan_name("clawhub")
         assert "SG-015" not in [finding.rule_id for finding in result.findings]
