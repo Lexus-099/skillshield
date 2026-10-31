@@ -216,7 +216,8 @@ The outputs in the comments come from scanning the sample `SKILL.md` above, and 
 | SG-009 | HIGH | Covert Channel | Steganography, DNS tunnelling, timing or covert channels, and data hidden in whitespace. |
 | SG-010 | HIGH | Social Engineering | False urgency, threats to suspend an account, and requests for passwords, codes or credentials. |
 | SG-011 | CRITICAL | Lethal Trifecta (Supply Chain Attack Pattern) | SG-001 prompt injection, a network reference (`http://`, `https://`, `requests`, `urllib`, `socket`, `curl`, `wget`) and file system access (`open(`, `os.listdir`, `os.walk`, `os.scandir`, `pathlib.Path`, `glob.glob`, `shutil`) all in the same text. It does not report line numbers. |
-| SG-012 | MEDIUM | Suspicious URL | URLs with a raw IP address, tunnel or request-capture services (ngrok, webhook.site, requestbin, pipedream), paste sites, URL shorteners, or the TLDs `.xyz`, `.tk`, `.ml`, `.ga`, `.cf`, `.gq` and `.top`. \n| SG-015 | MEDIUM | Well-known Skill Name Impersonation | Frontmatter names that closely resemble canonical skill names or add suspicious suffixes such as `1` or `-pro`. |
+| SG-012 | MEDIUM | Suspicious URL | URLs with a raw IP address, tunnel or request-capture services (ngrok, webhook.site, requestbin, pipedream), paste sites, URL shorteners, or the TLDs `.xyz`, `.tk`, `.ml`, `.ga`, `.cf`, `.gq` and `.top`. 
+| SG-015 | MEDIUM | Well-known Skill Name Impersonation | Frontmatter names that closely resemble canonical skill names or add suspicious suffixes such as `1` or `-pro`. |
 
 That is 5 CRITICAL rules, 6 HIGH rules and 2 MEDIUM rules. Run `skillshield rules` to see each rule with its tags.
 
