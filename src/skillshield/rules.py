@@ -451,7 +451,10 @@ RULE_SUSPICIOUS_URLS = Rule(
 # ── SG-015: Well-known skill name impersonation ─────────────────
 
 _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
-_NAME_FIELD = re.compile(r"^name\s*:\s*(.*?)\s*$", re.MULTILINE)
+_NAME_FIELD = re.compile(
+    r"""^(?:name|'name'|"name")[ \t]*:[ \t]*("(?:\\(?:\r\n|[\r\n])[ \t]*|\\.|[^"\\\r\n])*"|'(?:''|[^'])*'|[^\r\n]*)[ \t]*$""",
+    re.MULTILINE,
+)
 
 def _parse_name_scalar(value: str) -> str:
     """Parse a frontmatter name scalar using YAML comment and escape rules."""
