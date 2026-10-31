@@ -640,10 +640,17 @@ class TestBrandNameImpersonationRule:
         result = self._scan_name(r'"clawhub\u0031"')
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
+        finding = next(f for f in result.findings if f.rule_id == "SG-015")
+        assert finding.line_numbers == [2]
+        assert finding.snippets[0] == r'"clawhub\u0031"'
+
 
     def test_detects_multiline_double_quoted_name(self):
         result = self._scan_name('"claw\\\n  hub1"')
         assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+        finding = next(f for f in result.findings if f.rule_id == "SG-015")
+        assert finding.line_numbers == [2]
 
 
     def test_detects_multiline_double_quoted_name_with_trailing_comment(self):
@@ -662,6 +669,22 @@ class TestBrandNameImpersonationRule:
         )
         result = SkillScanner().scan_text(skill)
         assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    @pytest.mark.parametrize(
+        "header",
+        ["|", ">", "|-", "|+", ">-", ">+", "|2", ">2", "|2-", "|-2", ">+2", ">2+"],
+    )
+    def test_detects_name_inside_yaml_block_scalar(self, header):
+        result = self._scan_name(f"{header}\n  clawhub1")
+        finding = next(f for f in result.findings if f.rule_id == "SG-015")
+        assert finding.line_numbers == [3]
+        assert finding.snippets[0] == "clawhub1"
+
+    def test_detects_name_inside_yaml_block_scalar_with_comment(self):
+        result = self._scan_name(">- # folded name\n  clawhub1")
+        finding = next(f for f in result.findings if f.rule_id == "SG-015")
+        assert finding.line_numbers == [3]
+
 
     def test_detects_crlf_name_in_scan_text_and_scan_texts(self):
         skill = (
