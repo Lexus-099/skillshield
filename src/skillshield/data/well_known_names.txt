@@ -1,5 +1,7 @@
-# Extend this list with canonical, well-known skill names (one per line).
+# Canonical names reported in ClawHavoc-related skill impersonation cases.
+# Extend this list with well-known skill and tool names (one per line).
 clawhub
-github
-weather
-web-search
+polymarket
+yahoo-finance
+youtube-summarize
+solana-wallet-tracker
