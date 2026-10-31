@@ -452,7 +452,7 @@ RULE_SUSPICIOUS_URLS = Rule(
 
 _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 _NAME_FIELD = re.compile(
-    r"""^(?:name|'name'|"name")[ \t]*:[ \t]*("(?:\\(?:\r\n|[\r\n])[ \t]*|\\.|[^"\\\r\n])*"|'(?:''|[^'])*'|[^\r\n]*)[ \t]*$""",
+    r"""^(?:name|'name'|"name")[ \t]*:[ \t]*(?P<value>"(?:\\(?:\r?\n[ \t]*|\\.|[^"\\\r\n])*"|'(?:''|[^'])*'|[^\r\n]*)[ \t]*(?:#[^\r\n]*)?)\r?$""",
     re.MULTILINE,
 )
 
@@ -555,6 +555,35 @@ def _parse_name_scalar(value: str) -> str:
     return ""
 
 
+def _extract_name_scalar(frontmatter: str) -> str:
+    """Extract the top-level name scalar, including an indented empty-value form."""
+    match = _NAME_FIELD.search(frontmatter)
+    if not match:
+        return ""
+
+    raw_value = match.group("value")
+    stripped_value = raw_value.strip()
+    if stripped_value and not stripped_value.startswith("#"):
+        return _parse_name_scalar(raw_value)
+
+    # YAML also permits the scalar value on the next, indented line:
+    # name:
+    #   clawhub1
+    remainder = frontmatter[match.end() :]
+    next_line = re.match(
+        r"(?:\r?\n)[ \t]+(?P<scalar>\S[^\r\n]*)\r?(?:\n|$)",
+        remainder,
+    )
+    if not next_line:
+        return ""
+
+    scalar = next_line.group("scalar").strip()
+    # Do not interpret a nested mapping or block sequence as a scalar name.
+    if scalar.startswith("- ") or re.match(r"""^[^'"#][^:\r\n]*:[ \t]""", scalar):
+        return ""
+    return _parse_name_scalar(scalar)
+
+
 def _well_known_names() -> set[str]:
     """Load the bundled, extendable list of legitimate skill names."""
     names_path = Path(__file__).parent / "data" / "well_known_names.txt"
@@ -601,10 +630,7 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
     frontmatter = _FRONTMATTER_NAME.match(text)
     if not frontmatter:
         return []
-    name_match = _NAME_FIELD.search(frontmatter.group(1))
-    if not name_match:
-        return []
-    parsed_name = _parse_name_scalar(name_match.group(1))
+    parsed_name = _extract_name_scalar(frontmatter.group(1))
     name = parsed_name.casefold()
     if not name or any(char.isspace() for char in name):
         return []
