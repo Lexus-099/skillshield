@@ -555,33 +555,50 @@ def _parse_name_scalar(value: str) -> str:
     return ""
 
 
-def _extract_name_scalar(frontmatter: str) -> str:
-    """Extract the top-level name scalar, including an indented empty-value form."""
+_BLOCK_SCALAR_HEADER = re.compile(
+    r"""[|>](?:(?:[+-][1-9]?)|(?:[1-9][+-]?))?(?:[ \t]+#.*)?"""
+)
+
+
+def _extract_name_scalar(frontmatter: str) -> tuple[str, str]:
+    """Return the decoded name and a source-present snippet for line lookup."""
     match = _NAME_FIELD.search(frontmatter)
     if not match:
-        return ""
+        return "", ""
 
     raw_value = match.group("value")
     stripped_value = raw_value.strip()
-    if stripped_value and not stripped_value.startswith("#"):
-        return _parse_name_scalar(raw_value)
+    is_block_scalar_header = bool(_BLOCK_SCALAR_HEADER.fullmatch(stripped_value))
 
-    # YAML also permits the scalar value on the next, indented line:
-    # name:
-    #   clawhub1
+    if stripped_value and not stripped_value.startswith("#") and not is_block_scalar_header:
+        parsed_name = _parse_name_scalar(raw_value)
+        source_snippet = next(
+            (line.strip() for line in raw_value.splitlines() if line.strip()),
+            "",
+        )
+        return parsed_name, source_snippet
+
+    # Empty values may use an indented plain scalar. Block scalar headers
+    # (| or >, optionally with chomping/indent indicators) use the same
+    # indented content, but the content is literal/folded text, not a sequence.
     remainder = frontmatter[match.end() :]
-    next_line = re.match(
-        r"(?:\r?\n)[ \t]+(?P<scalar>\S[^\r\n]*)\r?(?:\n|$)",
-        remainder,
-    )
-    if not next_line:
-        return ""
+    for line in remainder.splitlines():
+        if not line.strip():
+            continue
+        if not line[0].isspace():
+            return "", ""
 
-    scalar = next_line.group("scalar").strip()
-    # Do not interpret a nested mapping or block sequence as a scalar name.
-    if scalar.startswith("- ") or re.match(r"""^[^'"#][^:\r\n]*:[ \t]""", scalar):
-        return ""
-    return _parse_name_scalar(scalar)
+        scalar = line.strip()
+        if not is_block_scalar_header and (
+            scalar.startswith("- ")
+            or re.match(r"""^[^'"#][^:\r\n]*:[ \t]""", scalar)
+        ):
+            return "", ""
+
+        parsed_name = _parse_name_scalar(scalar)
+        return parsed_name, scalar
+
+    return ""
 
 
 def _well_known_names() -> set[str]:
@@ -630,7 +647,7 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
     frontmatter = _FRONTMATTER_NAME.match(text)
     if not frontmatter:
         return []
-    parsed_name = _extract_name_scalar(frontmatter.group(1))
+    parsed_name, source_snippet = _extract_name_scalar(frontmatter.group(1))
     name = parsed_name.casefold()
     if not name or any(char.isspace() for char in name):
         return []
@@ -652,10 +669,10 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
             "app",
             "ai",
         }:
-            return [parsed_name]
+            return [source_snippet]
         limit = 2 if len(known_normalized) >= 8 else 1
         if _edit_distance_at_most(normalized, known_normalized, limit) <= limit:
-            return [parsed_name]
+            return [source_snippet]
     return []
 
 
