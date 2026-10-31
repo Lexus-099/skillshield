@@ -453,6 +453,49 @@ RULE_SUSPICIOUS_URLS = Rule(
 _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 _NAME_FIELD = re.compile(r"^name\s*:\s*(.*?)\s*$", re.MULTILINE)
 
+def _parse_name_scalar(value: str) -> str:
+    """Parse a frontmatter name scalar without treating quoted hashes as comments."""
+    value = value.strip()
+    if not value:
+        return ""
+
+    quote = value[0]
+    if quote not in {"'", '"'}:
+        for index, char in enumerate(value):
+            if char == "#" and (index == 0 or value[index - 1].isspace()):
+                return value[:index].rstrip()
+        return value
+
+    index = 1
+    escaped = False
+    while index < len(value):
+        char = value[index]
+        if quote == "'" and char == "'":
+            if index + 1 < len(value) and value[index + 1] == "'":
+                index += 2
+                continue
+            trailing = value[index + 1 :]
+            if trailing and not trailing[0].isspace():
+                return ""
+            trailing = trailing.strip()
+            return value[1:index].replace("''", "'") if not trailing or trailing.startswith("#") else ""
+
+        if quote == '"' and char == "\\" and not escaped:
+            escaped = True
+            index += 1
+            continue
+        if quote == '"' and char == '"' and not escaped:
+            trailing = value[index + 1 :]
+            if trailing and not trailing[0].isspace():
+                return ""
+            trailing = trailing.strip()
+            return value[1:index] if not trailing or trailing.startswith("#") else ""
+        escaped = False
+        index += 1
+
+    return ""
+
+
 
 def _well_known_names() -> set[str]:
     """Load the bundled, extendable list of legitimate skill names."""
@@ -503,7 +546,8 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
     name_match = _NAME_FIELD.search(frontmatter.group(1))
     if not name_match:
         return []
-    name = name_match.group(1).strip().strip("'\"").casefold()
+    parsed_name = _parse_name_scalar(name_match.group(1))
+    name = parsed_name.casefold()
     if not name or any(char.isspace() for char in name):
         return []
     known_names = _well_known_names()
@@ -514,7 +558,7 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
         return []
     for known in known_names:
         known_normalized = re.sub(r"[^a-z0-9]", "", known)
-        if not known_normalized or normalized == known_normalized:
+        if not known_normalized:
             continue
         if normalized.startswith(known_normalized) and normalized[len(known_normalized) :] in {
             "1",
@@ -524,10 +568,10 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
             "app",
             "ai",
         }:
-            return [name_match.group(1).strip()]
+            return [parsed_name]
         limit = 2 if len(known_normalized) >= 8 else 1
         if _edit_distance_at_most(normalized, known_normalized, limit) <= limit:
-            return [name_match.group(1).strip()]
+            return [parsed_name]
     return []
 
 
