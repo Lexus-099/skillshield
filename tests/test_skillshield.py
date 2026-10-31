@@ -642,8 +642,7 @@ class TestBrandNameImpersonationRule:
 
 
     def test_detects_multiline_double_quoted_name(self):
-        result = self._scan_name('"claw\' + "
-  hub1"')
+        result = self._scan_name('"claw\\\n  hub1"')
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
     @pytest.mark.parametrize("name_key", ['"name"', "'name'"])
