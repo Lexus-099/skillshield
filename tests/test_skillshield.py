@@ -645,6 +645,38 @@ class TestBrandNameImpersonationRule:
         result = self._scan_name('"claw\\\n  hub1"')
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
+
+    def test_detects_multiline_double_quoted_name_with_trailing_comment(self):
+        name = '"claw' + "\\" + "\n" + '  hub1" # release'
+        result = self._scan_name(name)
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    def test_detects_indented_scalar_after_empty_name(self):
+        skill = (
+            "---\n"
+            "name:\n"
+            "  clawhub1\n"
+            "description: test\n"
+            "---\n"
+            "A harmless skill."
+        )
+        result = SkillScanner().scan_text(skill)
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    def test_detects_crlf_name_in_scan_text_and_scan_texts(self):
+        skill = (
+            "---\r\n"
+            "name: clawhub1\r\n"
+            "description: test\r\n"
+            "---\r\n"
+            "A harmless skill."
+        )
+        result = SkillScanner().scan_text(skill)
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+        report = SkillScanner().scan_texts({"crlf": skill})
+        assert report.flagged_count == 1
+
     @pytest.mark.parametrize("name_key", ['"name"', "'name'"])
     def test_matches_quoted_name_keys(self, name_key):
         skill = (
