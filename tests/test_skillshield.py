@@ -610,30 +610,35 @@ def test_cli_version_prints_package_version(monkeypatch, capsys):
 
 
 class TestBrandNameImpersonationRule:
-    def test_detects_typo_of_known_name(self):
-        result = SkillScanner().scan_text(
-            "---\nname: cllawhub\ndescription: test\n---\nA harmless skill."
+    def _scan_name(self, name):
+        return SkillScanner().scan_text(
+            f"---\nname: {name}\ndescription: test\n---\nA harmless skill."
         )
-        assert "SG-013" in [finding.rule_id for finding in result.findings]
+
+    def test_detects_typo_of_known_name(self):
+        result = self._scan_name("cllawhub")
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
 
     def test_detects_known_name_with_numeric_suffix(self):
-        result = SkillScanner().scan_text(
-            "---\nname: clawhub1\ndescription: test\n---\nA harmless skill."
-        )
-        assert "SG-013" in [finding.rule_id for finding in result.findings]
+        result = self._scan_name("clawhub1")
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
+    def test_detects_known_name_with_pro_suffix(self):
+        result = self._scan_name("polymarket-pro")
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
 
     def test_allows_exact_known_name(self):
-        result = SkillScanner().scan_text(
-            "---\nname: clawhub\ndescription: test\n---\nA harmless skill."
-        )
-        assert "SG-013" not in [finding.rule_id for finding in result.findings]
+        result = self._scan_name("clawhub")
+        assert "SG-015" not in [finding.rule_id for finding in result.findings]
 
-    def test_does_not_flag_unrelated_name(self):
-        result = SkillScanner().scan_text(
-            "---\nname: weather\ndescription: test\n---\nA harmless skill."
-        )
-        assert "SG-013" not in [finding.rule_id for finding in result.findings]
+    @pytest.mark.parametrize(
+        "name",
+        ["research", "leather", "feather", "heater", "gitlab", "weather-uk"],
+    )
+    def test_does_not_flag_benign_near_misses(self, name):
+        result = self._scan_name(name)
+        assert "SG-015" not in [finding.rule_id for finding in result.findings]
 
     def test_ignores_files_without_frontmatter(self):
         result = SkillScanner().scan_text("# A normal skill\nNo metadata here.")
-        assert "SG-013" not in [finding.rule_id for finding in result.findings]
+        assert "SG-015" not in [finding.rule_id for finding in result.findings]
