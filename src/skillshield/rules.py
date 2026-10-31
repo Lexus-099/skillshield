@@ -598,7 +598,7 @@ def _extract_name_scalar(frontmatter: str) -> tuple[str, str]:
         parsed_name = _parse_name_scalar(scalar)
         return parsed_name, scalar
 
-    return ""
+    return "", ""
 
 
 def _well_known_names() -> set[str]:
