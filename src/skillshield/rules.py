@@ -448,7 +448,7 @@ RULE_SUSPICIOUS_URLS = Rule(
 )
 
 
-# ── SG-013: Well-known skill name impersonation ─────────────────
+# ── SG-015: Well-known skill name impersonation ─────────────────
 
 _FRONTMATTER_NAME = re.compile(r"^---\s*\n(.*?)\n---\s*(?:\n|$)", re.DOTALL)
 _NAME_FIELD = re.compile(r"^name\s*:\s*(.*?)\s*$", re.MULTILINE)
@@ -464,13 +464,19 @@ def _well_known_names() -> set[str]:
             if line.strip() and not line.lstrip().startswith("#")
         }
     except OSError:
-        return {"clawhub", "github", "weather", "web-search"}
+        return {
+            "clawhub",
+            "polymarket",
+            "yahoo-finance",
+            "youtube-summarize",
+            "solana-wallet-tracker",
+        }
 
 
-def _edit_distance_at_most_two(left: str, right: str) -> int:
-    """Levenshtein distance with an early cutoff at two edits."""
-    if abs(len(left) - len(right)) > 2:
-        return 3
+def _edit_distance_at_most(left: str, right: str, limit: int) -> int:
+    """Return Levenshtein distance, stopping once it exceeds the allowed limit."""
+    if abs(len(left) - len(right)) > limit:
+        return limit + 1
     previous = list(range(len(right) + 1))
     for i, char_left in enumerate(left, 1):
         current = [i]
@@ -483,8 +489,8 @@ def _edit_distance_at_most_two(left: str, right: str) -> int:
             )
             current.append(value)
             row_min = min(row_min, value)
-        if row_min > 2:
-            return 3
+        if row_min > limit:
+            return limit + 1
         previous = current
     return previous[-1]
 
@@ -519,13 +525,14 @@ def _check_brand_name_impersonation(text: str) -> list[str]:
             "ai",
         }:
             return [name_match.group(1).strip()]
-        if _edit_distance_at_most_two(normalized, known_normalized) <= 2:
+        limit = 2 if len(known_normalized) >= 8 else 1
+        if _edit_distance_at_most(normalized, known_normalized, limit) <= limit:
             return [name_match.group(1).strip()]
     return []
 
 
 RULE_BRAND_NAME_IMPERSONATION = Rule(
-    id="SG-013",
+    id="SG-015",
     name="Well-known Skill Name Impersonation",
     severity=Severity.MEDIUM,
     description=(
