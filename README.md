@@ -19,7 +19,7 @@ An agent skill is a file of instructions or code that an AI agent loads and foll
 - Snyk's ToxicSkills study scanned 3,984 skills from ClawHub and skills.sh. 534 skills (13.4%) had at least one critical issue. 1,467 skills had at least one security issue. Snyk confirmed 76 malicious payloads. [[2]](#sources)
 - The OWASP Agentic Skills Top 10 lists Malicious Skills as AST01 and Supply Chain Compromise as AST02. [[3]](#sources)
 
-skillshield checks skill files for these patterns with 12 rules. It runs locally and needs no network access.
+skillshield checks skill files for these patterns with 13 rules. It runs locally and needs no network access.
 
 ---
 
@@ -58,7 +58,7 @@ skillshield scan SKILL.md                  # scan one file
 skillshield scan ./skills/                 # scan a directory
 skillshield scan - < SKILL.md              # scan stdin
 skillshield check "some text to scan"      # scan text given on the command line
-skillshield rules                          # list the 12 rules
+skillshield rules                          # list the 13 rules
 skillshield --version
 ```
 
@@ -216,7 +216,7 @@ The outputs in the comments come from scanning the sample `SKILL.md` above, and 
 | SG-009 | HIGH | Covert Channel | Steganography, DNS tunnelling, timing or covert channels, and data hidden in whitespace. |
 | SG-010 | HIGH | Social Engineering | False urgency, threats to suspend an account, and requests for passwords, codes or credentials. |
 | SG-011 | CRITICAL | Lethal Trifecta (Supply Chain Attack Pattern) | SG-001 prompt injection, a network reference (`http://`, `https://`, `requests`, `urllib`, `socket`, `curl`, `wget`) and file system access (`open(`, `os.listdir`, `os.walk`, `os.scandir`, `pathlib.Path`, `glob.glob`, `shutil`) all in the same text. It does not report line numbers. |
-| SG-012 | MEDIUM | Suspicious URL | URLs with a raw IP address, tunnel or request-capture services (ngrok, webhook.site, requestbin, pipedream), paste sites, URL shorteners, or the TLDs `.xyz`, `.tk`, `.ml`, `.ga`, `.cf`, `.gq` and `.top`. |\n| SG-013 | MEDIUM | Well-known Skill Name Impersonation | Frontmatter names that closely resemble canonical skill names or add suspicious suffixes such as `1` or `-pro`. |
+| SG-012 | MEDIUM | Suspicious URL | URLs with a raw IP address, tunnel or request-capture services (ngrok, webhook.site, requestbin, pipedream), paste sites, URL shorteners, or the TLDs `.xyz`, `.tk`, `.ml`, `.ga`, `.cf`, `.gq` and `.top`. \n| SG-015 | MEDIUM | Well-known Skill Name Impersonation | Frontmatter names that closely resemble canonical skill names or add suspicious suffixes such as `1` or `-pro`. |
 
 That is 5 CRITICAL rules, 6 HIGH rules and 2 MEDIUM rules. Run `skillshield rules` to see each rule with its tags.
 
@@ -397,7 +397,7 @@ skillshield scan ./skills/ --format sarif > skillshield.sarif
 
 - CRITICAL and HIGH findings have the level `error`. MEDIUM is `warning`, LOW is `note` and INFO is `none`.
 - Each result has one location per matched line, up to 5. A finding with no line numbers, such as SG-011, points at line 1.
-- The rule list in the log always holds all 12 rules.
+- The rule list in the log always holds all 13 rules.
 
 ---
 
