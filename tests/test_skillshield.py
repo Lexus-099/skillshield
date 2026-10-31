@@ -635,6 +635,11 @@ class TestBrandNameImpersonationRule:
         result = self._scan_name('"clawhub#1"')
         assert "SG-015" in [finding.rule_id for finding in result.findings]
 
+
+    def test_decodes_unicode_escape_in_double_quoted_name(self):
+        result = self._scan_name(r'"clawhub\u0031"')
+        assert "SG-015" in [finding.rule_id for finding in result.findings]
+
     def test_detects_punctuation_only_name_variant(self):
         result = self._scan_name("claw-hub")
         assert "SG-015" in [finding.rule_id for finding in result.findings]
