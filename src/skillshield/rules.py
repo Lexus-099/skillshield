@@ -478,7 +478,9 @@ def _parse_name_scalar(value: str) -> str:
             if trailing and not trailing[0].isspace():
                 return ""
             trailing = trailing.strip()
-            return value[1:index].replace("''", "'") if not trailing or trailing.startswith("#") else ""
+            if not trailing or trailing.startswith("#"):
+                return value[1:index].replace("''", "'")
+            return ""
 
         if quote == '"' and char == "\\" and not escaped:
             escaped = True
@@ -494,7 +496,6 @@ def _parse_name_scalar(value: str) -> str:
         index += 1
 
     return ""
-
 
 
 def _well_known_names() -> set[str]:
